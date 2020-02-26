@@ -640,7 +640,7 @@ void eval_micro_sequencer()
             next_state |= (CURRENT_LATCHES.IR & 0x0800) >> 11;
             break;
         default: // unconditional, i hope we don't have a state 4
-            next_state = GetJ(CURRENT_LATCHES.MICROINSTRUCTION)
+            next_state = GetJ(CURRENT_LATCHES.MICROINSTRUCTION);
         }
     }
     memcpy(NEXT_LATCHES.MICROINSTRUCTION, CONTROL_STORE[next_state], sizeof(int) * CONTROL_STORE_BITS);
@@ -681,7 +681,7 @@ void cycle_memory()
             }
             else
             { // R is set so read memory into the register
-                CURRENT_LATCHES.MDR = Low16bits(MEMORY[word_address][0] + MEMORY[word_address][1] << 8)
+                CURRENT_LATCHES.MDR = Low16bits(MEMORY[word_address][0] + MEMORY[word_address][1] << 8);
             }
         }
         else if (mem_cycle == (MEM_CYCLES - 1))
