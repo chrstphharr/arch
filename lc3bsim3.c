@@ -754,7 +754,7 @@ void drive_bus()
     {
         if (GetMARMUX(CURRENT_LATCHES.MICROINSTRUCTION))
         {
-            op1 = (address1mux) ? CURRENT_LATCHES.REGS[(CURRENT_LATCHES >> (6 + (sr1mux * 3))) & 0x07] : CURRENT_LATCHES.PC;
+            op1 = (address1mux) ? CURRENT_LATCHES.REGS[(CURRENT_LATCHES >> (6 + ((int)sr1mux * 3))) & 0x07] : CURRENT_LATCHES.PC;
             switch (address2mux)
             {
             case 1:
@@ -834,7 +834,7 @@ void drive_bus()
     }
     case 5:
     {
-        bus = (dataSize) ? Low16bits(CURRENT_LATCHES.MDR) : Low16bits(signExtend(CURRENT_LATCHES.MDR & 0x00FF, 7));
+        BUS = (dataSize) ? Low16bits(CURRENT_LATCHES.MDR) : Low16bits(signExtend(CURRENT_LATCHES.MDR & 0x00FF, 7));
     }
     default:
     {
