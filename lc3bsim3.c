@@ -785,6 +785,7 @@ void drive_bus()
             default:
             {
                 op2 = 0;
+                break;
             }
             }
 
@@ -798,10 +799,12 @@ void drive_bus()
         {
             BUS = (CURRENT_LATCHES.IR & 0x0FF) << 1;
         }
+        break;
     }
     case 2:
     {
         BUS = CURRENT_LATCHES.PC;
+        break;
     }
     case 3:
     {
@@ -812,20 +815,25 @@ void drive_bus()
         case 0:
         {
             BUS = (imm) ? Low16bits(CURRENT_LATCHES.REGS[sr1] + sr2) : Low16bits(CURRENT_LATCHES.REGS[sr1] + CURRENT_LATCHES.REGS[sr2]);
+            break;
         }
         case 1:
         {
             BUS = (imm) ? Low16bits(CURRENT_LATCHES.REGS[sr1] & sr2) : Low16bits(CURRENT_LATCHES.REGS[sr1] & CURRENT_LATCHES.REGS[sr2]);
+            break;
         }
         case 2:
         {
             BUS = (imm) ? Low16bits(CURRENT_LATCHES.REGS[sr1] ^ sr2) : Low16bits(CURRENT_LATCHES.REGS[sr1] ^ CURRENT_LATCHES.REGS[sr2]);
+            break;
         }
         default:
         {
             BUS = Low16bits(CURRENT_LATCHES.REGS[sr1]);
+            break;
         }
         }
+        break;
     }
     case 4:
     {
@@ -841,10 +849,12 @@ void drive_bus()
         }
         else
             BUS = Low16bits(CURRENT_LATCHES.REGS[sr1] << shiftAmt);
+        break;
     }
     case 5:
     {
         BUS = (dataSize) ? Low16bits(CURRENT_LATCHES.MDR) : Low16bits(signExtend(CURRENT_LATCHES.MDR & 0x00FF, 7));
+        break;
     }
     default:
     {
@@ -854,13 +864,125 @@ void drive_bus()
     }
 }
 
-void latch_datapath_values()
-{
-
-    /* 
+/* 
    * Datapath routine for computing all functions that need to latch
    * values in the data path at the end of this cycle.  Some values
    * require sourcing the bus; therefore, this routine has to come 
    * after drive_bus.
    */
+
+void setConditionCodes(int result)
+{
+    if (result < 0)
+    {
+        NEXT_LATCHES.N = 1;
+        NEXT_LATCHES.Z = 0;
+        NEXT_LATCHES.P = 0;
+    }
+    else if (result > 0)
+    {
+        NEXT_LATCHES.N = 0;
+        NEXT_LATCHES.Z = 0;
+        NEXT_LATCHES.P = 1;
+    }
+    else
+    {
+        NEXT_LATCHES.N = 0;
+        NEXT_LATCHES.Z = 1;
+        NEXT_LATCHES.P = 0;
+    }
+}
+void latch_datapath_values()
+{
+    int loadMAR = GetLD_MAR(CURRENT_LATCHES.MICROINSTRUCTION);
+    int loadMDR = GetLD_MDR(CURRENT_LATCHES.MICROINSTRUCTION);
+    int memEN = GetMIO_EN(CURRENT_LATCHES.MICROINSTRUCTION);
+    int dataSize = GetDATA_SIZE(CURRENT_LATCHES.MICROINSTRUCTION);
+    int loadIR = GetLD_IR(CURRENT_LATCHES.MICROINSTRUCTION);
+    int address = CURRENT_LATCHES.MAR >> 1;
+    int byte = CURRENT_LATCHES.MAR & 0x01;
+    int drMux = GetDRMUX(CURRENT_LATCHES.MICROINSTRUCTION);
+    int loadReg = GetLD_REG(CURRENT_LATCHES.MICROINSTRUCTION);
+    int sr1mux = GetSR1MUX(CURRENT_LATCHES.MICROINSTRUCTION);
+    int address1mux = GetADDR1MUX(CURRENT_LATCHES.MICROINSTRUCTION);
+    int address2mux = GetADDR2MUX(CURRENT_LATCHES.MICROINSTRUCTION);
+    int leftShift GetLSHF1(CURRENT_LATCHES.MICROINSTRUCTION);
+    int pcMux = GetPCMUX(CURRENT_LATCHES.MICROINSTRUCTION);
+    int loadPC = GetLD_PC(CURRENT_LATCHES.MICROINSTRUCTION);
+    int loadCC = GetLD_CC(CURRENT_LATCHES.MICROINSTRUCTION);
+    int op1, op2;
+
+    if (loadMAR)
+        NEXT_LATCHES.MAR = Low16bits(BUS);
+    if (loadMDR)
+    {
+        if (memEN)
+        {
+            if (CURRENT_LATCHES.READY)
+            {
+                if (dataSize)
+                    NEXT_LATCHES.MDR = MEMORY[address][0] & 0x00FF | (MEMORY[address][1] & 0x00FF) << 8;
+                else
+                    NEXT_LATCHES.MDR = signExtend(MEMORY[address][byte] & 0x00FF, 7);
+                NEXT_LATCHES.READY = 0;
+                mem_cycle = 0;
+            }
+        }
+        else
+            NEXT_LATCHES.MDR = (dataSize) ? Low16bits(BUS) : BUS & 0x00FF
+    }
+    NEXT_LATCHES.IR = (loadIR) ? Low16bits(BUS) : NEXT_LATCHES.IR;
+    if (loadReg)
+        if (drMux)
+            NEXT_LATCHES.REGS[7] = Low16bits(BUS);
+        else
+            NEXT_LATCHES.REGS[(CURRENT_LATCHES.IR >> 9) & 0x07] = Low16bits(BUS);
+    if (loadCC)
+        setConditionCodes(signExtend(Low16bits(BUS), 15));
+    if (loadPC)
+    {
+        switch (pcMux)
+        {
+        case 0:
+        {
+            NEXT_LATCHES.PC = CURRENT_LATCHES.PC + 2;
+            break;
+        }
+        case 1:
+        {
+            NEXT_LATCHES.PC = Low16bits(BUS);
+            break;
+        }
+        default:
+        {
+            op1 = (address1mux) ? CURRENT_LATCHES.REGS[(CURRENT_LATCHES.IR >> (6 + (sr1mux * 3)) & 0x07)] : CURRENT_LATCHES.PC;
+            switch (address2mux)
+            {
+            case 1:
+            {
+                op2 = signExtend(CURRENT_LATCHES.IR & 0x003F, 5);
+                break;
+            }
+            case 2:
+            {
+                op2 = signExtend(CURRENT_LATCHES.IR & 0x01FF, 8);
+                break;
+            }
+            case 3:
+            {
+                op2 = signExtend(CURRENT_LATCHES.IR & 0x07FF, 10);
+                break;
+            }
+            default:
+            {
+                op2 = 0;
+                break;
+            }
+            }
+            op2 = (leftShift) ? op2 << 1 : op2;
+            NEXT_LATCHES.PC = op1 + op2;
+            break;
+        }
+        }
+    }
 }
