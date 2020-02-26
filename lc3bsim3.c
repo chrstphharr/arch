@@ -652,23 +652,18 @@ void eval_bus_drivers() {
    gate = 0;
    if (GetGATE_MARMUX(CURRENT_LATCHES.MICROINSTRUCTION)) {
       gate = 0x01;
-      printf("driving GATE_MARMUX\n");
    }
    if (GetGATE_PC(CURRENT_LATCHES.MICROINSTRUCTION)) {
       gate = 0x02;
-      printf("driving GATE_PC\n");
    }
    if (GetGATE_ALU(CURRENT_LATCHES.MICROINSTRUCTION)) {
       gate = 0x04;
-      printf("driving GATE_ALU\n");
    }
    if (GetGATE_SHF(CURRENT_LATCHES.MICROINSTRUCTION)) {
       gate = 0x08;
-      printf("driving GATE_SHF\n");
    }
    if (GetGATE_MDR(CURRENT_LATCHES.MICROINSTRUCTION)) {
       gate = 0x10;
-      printf("driving GATE_MDR\n");
    }
 }
 
@@ -680,9 +675,9 @@ void drive_bus() {
    * tristate drivers. 
    */       
     
-    if( CURRENT_LATCHES.MICROINSTRUCTION[GATE_PC] ) BUS = Low16bits( GATE_PC_INPUT );
-    else if( CURRENT_LATCHES.MICROINSTRUCTION[GATE_MDR] ) BUS = Low16bits( GATE_MDR_INPUT );
-    else if( CURRENT_LATCHES.MICROINSTRUCTION[GATE_ALU] ) BUS = Low16bits( GATE_ALU_INPUT );
+    if( CURRENT_LATCHES.MICROINSTRUCTION[GATE_PC] ) BUS = Low16bits( CURRENT_LATCHES.PC );
+    else if( CURRENT_LATCHES.MICROINSTRUCTION[GATE_MDR] ) BUS = Low16bits( CURRENT_LATCHES.MDR );
+    else if( CURRENT_LATCHES.MICROINSTRUCTION[GATE_ALU] ) BUS = Low16bits( CURRENT_LATCHES.ALUX );
     else if( CURRENT_LATCHES.MICROINSTRUCTION[GATE_MARMUX] ) BUS = Low16bits( GATE_MARMUX_INPUT );
     else if( CURRENT_LATCHES.MICROINSTRUCTION[GATE_SHF] ) BUS = Low16bits( GATE_SHF_INPUT );
     else BUS = 0;
