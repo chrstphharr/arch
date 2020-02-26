@@ -621,6 +621,8 @@ int main(int argc, char *argv[])
    */
 void eval_micro_sequencer()
 {
+            printf("in micro sequencer\n");
+
     int next_state;
     if (GetIRD(CURRENT_LATCHES.MICROINSTRUCTION))
     { // if decode get opcode
