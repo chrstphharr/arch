@@ -719,23 +719,29 @@ void eval_bus_drivers()
 {
     gate = 0;
     if (GetGATE_MARMUX(CURRENT_LATCHES.MICROINSTRUCTION))
-    {
+    {                printf("gate = 1\n");
+
         gate = 1;
     }
     if (GetGATE_PC(CURRENT_LATCHES.MICROINSTRUCTION))
     {
+                printf("gate = 2\n");
+
         gate = 2;
     }
     if (GetGATE_ALU(CURRENT_LATCHES.MICROINSTRUCTION))
-    {
+    {                printf("gate =3\n");
+
         gate = 3;
     }
     if (GetGATE_SHF(CURRENT_LATCHES.MICROINSTRUCTION))
-    {
+    {                printf("gate = 4\n");
+
         gate = 4;
     }
     if (GetGATE_MDR(CURRENT_LATCHES.MICROINSTRUCTION))
-    {
+    {                printf("gate = 5\n");
+
         gate = 5;
     }
 }
