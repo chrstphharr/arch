@@ -732,6 +732,15 @@ void eval_bus_drivers()
     }
 }
 
+
+int signExtend(int num, int signbit) {
+   if (num && (1 << signbit)) {
+      num = num << (8*sizeof(int)-1-signbit);
+      num = num >> (8*sizeof(int)-1-signbit);
+   }
+   return(num);
+}
+
 /* 
      * Datapath routine for driving the bus from one of the 5 possible 
    * tristate drivers. 
@@ -838,7 +847,7 @@ void drive_bus()
     }
     default:
     {
-        bus = 0;
+        BUS = 0;
         break;
     }
     }
