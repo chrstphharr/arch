@@ -906,7 +906,7 @@ void latch_datapath_values()
     int sr1mux = GetSR1MUX(CURRENT_LATCHES.MICROINSTRUCTION);
     int address1mux = GetADDR1MUX(CURRENT_LATCHES.MICROINSTRUCTION);
     int address2mux = GetADDR2MUX(CURRENT_LATCHES.MICROINSTRUCTION);
-    int leftShift GetLSHF1(CURRENT_LATCHES.MICROINSTRUCTION);
+    int leftShift = GetLSHF1(CURRENT_LATCHES.MICROINSTRUCTION);
     int pcMux = GetPCMUX(CURRENT_LATCHES.MICROINSTRUCTION);
     int loadPC = GetLD_PC(CURRENT_LATCHES.MICROINSTRUCTION);
     int loadCC = GetLD_CC(CURRENT_LATCHES.MICROINSTRUCTION);
@@ -929,7 +929,7 @@ void latch_datapath_values()
             }
         }
         else
-            NEXT_LATCHES.MDR = (dataSize) ? Low16bits(BUS) : BUS & 0x00FF
+            NEXT_LATCHES.MDR = (dataSize) ? Low16bits(BUS) : BUS & 0x00FF;
     }
     NEXT_LATCHES.IR = (loadIR) ? Low16bits(BUS) : NEXT_LATCHES.IR;
     if (loadReg)
