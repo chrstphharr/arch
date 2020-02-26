@@ -754,7 +754,7 @@ void drive_bus()
     {
         if (GetMARMUX(CURRENT_LATCHES.MICROINSTRUCTION))
         {
-            op1 = (address1mux) ? CURRENT_LATCHES.REGS[(CURRENT_LATCHES >> (6 + ((int)sr1mux * 3))) & 0x07] : CURRENT_LATCHES.PC;
+            op1 = (address1mux) ? CURRENT_LATCHES.REGS[((int)CURRENT_LATCHES >> (6 + ((int)sr1mux * 3))) & 0x07] : CURRENT_LATCHES.PC;
             switch (address2mux)
             {
             case 1:
