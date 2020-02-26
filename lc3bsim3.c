@@ -610,8 +610,6 @@ void eval_micro_sequencer() {
    */
 
 int mem_cycle = 0;
-#define MEM_CYCLES 4 //because 0-4 is 5 and you said it takes 5 cycles
-
 void cycle_memory() {
 	int word_address;
 	if (GetMIO_EN(CURRENT_LATCHES.MICROINSTRUCTION))
