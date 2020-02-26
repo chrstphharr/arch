@@ -567,81 +567,75 @@ int main(int argc, char *argv[]) {
    Begin your code here 	  			       */
 /***************************************************************/
 
-
-void eval_micro_sequencer() {
-
   /* 
    * Evaluate the address of the next state according to the 
    * micro sequencer logic. Latch the next microinstruction.
+   *
+   * moved this crap out of my function, dosen't go inside,
+   * goes outside
+   *
    */
-  int next_state;
-  if(GetIRD(CURRENT_LATCHES.MICROINSTRUCTION) == 1) {
-    next_state = (CURRENT_LATCHES.IR >> 12) & 0x000F;
-  }
-  else
-  {
-    next_state = GetJ(CURRENT_LATCHES.MICROINSTRUCTION);
-    switch(GetCOND(CURRENT_LATCHES.MICROINSTRUCTION))
-    {
-      case 1:
-        next_state |= CURRENT_LATCHES.READY << 1;
-	break;
-      case 2:
-	next_state |= CURRENT_LATCHES.BEN << 2;
-	break;
-      case 3:
-	next_state |= (CURRENT_LATCHES.IR & 0x0800) >> 11;
-	break;
-    }
-  }
-  memcpy(NEXT_LATCHES.MICROINSTRUCTION, CONTROL_STORE[next_state], sizeof(int)*CONTROL_STORE_BITS);
-  NEXT_LATCHES.STATE_NUMBER = next_state;
+void eval_micro_sequencer() {
+	int next_state;
+	if(GetIRD(CURRENT_LATCHES.MICROINSTRUCTION)) {
+		next_state = (CURRENT_LATCHES.IR >> 12) & 0x0F;
+	}else{
+		next_state = GetJ(CURRENT_LATCHES.MICROINSTRUCTION);
+		switch(GetCOND(CURRENT_LATCHES.MICROINSTRUCTION))
+		{
+			case 1:
+				next_state |= CURRENT_LATCHES.READY << 1;
+				break;
+			case 2:
+				next_state |= CURRENT_LATCHES.BEN << 2;
+				break;
+			case 3:
+				next_state |= (CURRENT_LATCHES.IR & 0x0800) >> 11;
+				break;
+		}
+	}
+	memcpy(NEXT_LATCHES.MICROINSTRUCTION, CONTROL_STORE[next_state], sizeof(int)*CONTROL_STORE_BITS);
+	NEXT_LATCHES.STATE_NUMBER = next_state;
 }
 
-#define DATA_SIZE_WORD 1
-int mem_cycle = 0;
-void cycle_memory() {
- 
+
   /* 
    * This function emulates memory and the WE logic. 
    * Keep track of which cycle of MEMEN we are dealing with.  
    * If fourth, we need to latch Ready bit at the end of 
    * cycle to prepare microsequencer for the fifth cycle.  
+   *
+   * instructions go outside homie!
+   *
    */
-  
-  int word_address;
-  if (GetMIO_EN(CURRENT_LATCHES.MICROINSTRUCTION))
-  {
-    mem_cycle++;
-    if (mem_cycle = MEM_CYCLES)
-    {	
-      word_address = (CURRENT_LATCHES.MAR >> 1) & 0x7FFF;
-      if (GetR_W(CURRENT_LATCHES.MICROINSTRUCTION))
-      {
-	if (GetDATA_SIZE(CURRENT_LATCHES.MICROINSTRUCTION) == DATA_SIZE_WORD)
-        {
-	  if (CURRENT_LATCHES.MAR & 0x0001)
-          {
-            MEMORY[word_address][0] = (unsigned char)(CURRENT_LATCHES.MDR & 0x00FF);
-            MEMORY[word_address][1] = (unsigned char)(CURRENT_LATCHES.MDR & 0xFF00);
-          }
-        }
-        else
-        {
-          MEMORY[CURRENT_LATCHES.MAR/2][0] = Low16bits((MEMORY[word_address][1] << 8) | MEMORY[word_address][0]);
-        }
-      }
-      else if (mem_cycle == (MEM_CYCLES - 1))
-      {
-        CURRENT_LATCHES.READY = 1;
-      }
-    }
-    else
-    {
-      mem_cycle = 0;
-      CURRENT_LATCHES.READY = 0;
-    }
-  }
+
+int mem_cycle = 0;
+#define MEM_CYCLES 4 //because 0-4 is 5 and you said it takes 5 cycles
+
+void cycle_memory() {
+	int word_address;
+	if (GetMIO_EN(CURRENT_LATCHES.MICROINSTRUCTION))
+	{
+		mem_cycle++;
+		if (mem_cycle = MEM_CYCLES){
+			word_address = (CURRENT_LATCHES.MAR >> 1) & 0x7FFF;
+			if (GetR_W(CURRENT_LATCHES.MICROINSTRUCTION)){
+				if (GetDATA_SIZE(CURRENT_LATCHES.MICROINSTRUCTION)){ // if true then its a word not a byte
+					if (CURRENT_LATCHES.MAR & 0x0001){
+						MEMORY[word_address][0] = (unsigned char)(CURRENT_LATCHES.MDR & 0x00FF);
+						MEMORY[word_address][1] = (unsigned char)(CURRENT_LATCHES.MDR & 0xFF00);
+					}
+				}else{ // else it's a byte
+					MEMORY[word_address][CURRENT_LATCHES.MAR & 0x01] = Low16bits((MEMORY[word_address][1] << 8) | MEMORY[word_address][0]);
+				}
+			}else if (mem_cycle == (MEM_CYCLES - 1)){
+				CURRENT_LATCHES.READY = 1;
+			}
+		}else{
+			mem_cycle = 0;
+			CURRENT_LATCHES.READY = 0;
+		}
+	}
 }
 
 
