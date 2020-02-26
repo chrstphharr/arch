@@ -732,13 +732,14 @@ void eval_bus_drivers()
     }
 }
 
-
-int signExtend(int num, int signbit) {
-   if (num && (1 << signbit)) {
-      num = num << (8*sizeof(int)-1-signbit);
-      num = num >> (8*sizeof(int)-1-signbit);
-   }
-   return(num);
+int signExtend(int num, int signbit)
+{
+    if (num && (1 << signbit))
+    {
+        num = num << (8 * sizeof(int) - 1 - signbit);
+        num = num >> (8 * sizeof(int) - 1 - signbit);
+    }
+    return (num);
 }
 
 /* 
@@ -851,14 +852,15 @@ void drive_bus()
         break;
     }
     }
+}
 
-    void latch_datapath_values()
-    {
+void latch_datapath_values()
+{
 
-        /* 
+    /* 
    * Datapath routine for computing all functions that need to latch
    * values in the data path at the end of this cycle.  Some values
    * require sourcing the bus; therefore, this routine has to come 
    * after drive_bus.
    */
-    }
+}
