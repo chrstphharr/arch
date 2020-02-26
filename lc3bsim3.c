@@ -660,6 +660,8 @@ void eval_micro_sequencer()
 int mem_cycle = 0;
 void cycle_memory()
 {
+            printf("in cycle_memory\n");
+
     int word_address = CURRENT_LATCHES.MAR >> 1 & 0x7FFF;
     int spot = CURRENT_LATCHES.MAR & 0x01;
     if (GetMIO_EN(CURRENT_LATCHES.MICROINSTRUCTION))
