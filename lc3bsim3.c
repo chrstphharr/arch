@@ -645,7 +645,11 @@ void eval_micro_sequencer()
             next_state = GetJ(CURRENT_LATCHES.MICROINSTRUCTION);
         }
     }
+            printf("before memcpy\n");
+
     memcpy(NEXT_LATCHES.MICROINSTRUCTION, CONTROL_STORE[next_state], sizeof(int) * CONTROL_STORE_BITS);
+            printf("after memcpy\n");
+
     NEXT_LATCHES.STATE_NUMBER = next_state;
 }
 
