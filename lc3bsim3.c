@@ -647,7 +647,7 @@ void eval_micro_sequencer()
     }
             printf("before memcpy\n");
 
-    memcpy(NEXT_LATCHES.MICROINSTRUCTION, CONTROL_STORE[next_state], sizeof(int) * CONTROL_STORE_BITS);
+    memcpy(NEXT_LATCHES.MICROINSTRUCTION, CONTROL_STORE[NEXT_LATCHES.STATE_NUMBER], sizeof(int) * CONTROL_STORE_BITS);
             printf("after memcpy\n");
 
     NEXT_LATCHES.STATE_NUMBER = next_state;
