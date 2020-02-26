@@ -637,9 +637,6 @@ void cycle_memory() {
 }
 
 
-
-void eval_bus_drivers() {
-
   /* 
    * Datapath routine emulating operations before driving the bus.
    * Evaluate the input of tristate drivers 
@@ -650,6 +647,29 @@ void eval_bus_drivers() {
    *		 Gate_MDR.
    */    
 
+int gate;
+void eval_bus_drivers() {
+   gate = 0;
+   if (GetGATE_MARMUX(CURRENT_LATCHES.MICROINSTRUCTION)) {
+      gate = 0x01;
+      printf("driving GATE_MARMUX\n");
+   }
+   if (GetGATE_PC(CURRENT_LATCHES.MICROINSTRUCTION)) {
+      gate = 0x02;
+      printf("driving GATE_PC\n");
+   }
+   if (GetGATE_ALU(CURRENT_LATCHES.MICROINSTRUCTION)) {
+      gate = 0x04;
+      printf("driving GATE_ALU\n");
+   }
+   if (GetGATE_SHF(CURRENT_LATCHES.MICROINSTRUCTION)) {
+      gate = 0x08;
+      printf("driving GATE_SHF\n");
+   }
+   if (GetGATE_MDR(CURRENT_LATCHES.MICROINSTRUCTION)) {
+      gate = 0x10;
+      printf("driving GATE_MDR\n");
+   }
 }
 
 
